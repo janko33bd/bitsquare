@@ -97,7 +97,6 @@ public class WalletService {
     private final ObjectProperty<List<Peer>> connectedPeers = new SimpleObjectProperty<>();
     public final BooleanProperty shutDownDone = new SimpleBooleanProperty();
     private final Storage<Long> storage;
-    private final Long bloomFilterTweak;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -112,17 +111,10 @@ public class WalletService {
         this.addressEntryList = addressEntryList;
         this.params = preferences.getBitcoinNetwork().getParameters();
         this.walletDir = new File(appDir, "bitcoin");
+        log.info("walletDir "+ walletDir.getPath());
         this.userAgent = userAgent;
         useTor = preferences.getUseTorForBitcoinJ();
-
-        storage = new Storage<>(walletDir);
-        Long persisted = storage.initAndGetPersisted("BloomFilterNonce");
-        if (persisted != null) {
-            bloomFilterTweak = persisted;
-        } else {
-            bloomFilterTweak = new Random().nextLong();
-            storage.queueUpForSave(bloomFilterTweak, 100);
-        }
+        storage = new Storage<>(walletDir);       
     }
 
 
@@ -135,7 +127,6 @@ public class WalletService {
         // we cannot forget to switch threads when adding event handlers. Unfortunately, the DownloadListener
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
-
         Threading.USER_THREAD = UserThread.getExecutor();
 
         Timer timeoutTimer = UserThread.runAfter(() ->
@@ -146,14 +137,13 @@ public class WalletService {
         backupWallet();
 
         // If seed is non-null it means we are restoring from backup.
-        walletAppKit = new WalletAppKit(params, walletDir, "Bitsquare") {
+        walletAppKit = new WalletAppKit(params, walletDir, "Blacksquare") {
             @Override
             protected void onSetupCompleted() {
                 // Don't make the user wait for confirmations for now, as the intention is they're sending it
                 // their own money!
                 walletAppKit.wallet().allowSpendingUnconfirmedTransactions();
-                if (params != RegTestParams.get())
-                    walletAppKit.peerGroup().setMaxConnections(11);
+                walletAppKit.peerGroup().setMaxConnections(11);
 
                 wallet = walletAppKit.wallet();
                 wallet.addEventListener(walletEventListener);
@@ -166,7 +156,7 @@ public class WalletService {
                     }
 
                     @Override
-                    public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
+                    public void onBlocksDownloaded(Peer peer, Block block, int blocksLeft) {
                     }
 
                     @Override
@@ -211,74 +201,17 @@ public class WalletService {
             }
         };
 
-        // Bloom filters in BitcoinJ are completely broken
-        // See: https://jonasnick.github.io/blog/2015/02/12/privacy-in-bitcoinj/
-        // Here are a few improvements to fix a few vulnerabilities.
-
-        // Bitsquare's BitcoinJ fork has added a bloomFilterTweak (nonce) setter to reuse the same seed avoiding the trivial vulnerability
-        // by getting the real pub keys by intersections of several filters sent at each startup.
-        walletAppKit.setBloomFilterTweak(bloomFilterTweak);
-
-        // Avoid the simple attack (see: https://jonasnick.github.io/blog/2015/02/12/privacy-in-bitcoinj/) due to the 
-        // default implementation using both pubkey and hash of pubkey
-        walletAppKit.setInsertPubKey(false);
-
-        // Default only 266 keys are generated (2 * 100+33). That would trigger new bloom filters when we are reaching 
-        // the threshold. To avoid reaching the threshold we create much more keys which are unlikely to cause update of the
-        // filter for most users. With lookaheadSize of 500 we get 1333 keys which should be enough for most users to 
-        // never need to update a bloom filter, which would weaken privacy.
-        walletAppKit.setLookaheadSize(500);
-
-        // Calculation is derived from: https://www.reddit.com/r/Bitcoin/comments/2vrx6n/privacy_in_bitcoinj_android_wallet_multibit_hive/coknjuz
-        // Nr of false positives (56M keys in the blockchain): 
-        // First attempt for FP rate:
-        // FP rate = 0,0001;  Nr of false positives: 0,0001 * 56 000 000  = 5600
-        // We have 1333keys: 1333 / (5600 + 1333) = 0.19 -> 19 % probability that a pub key is in our wallet
-        // After tests I found out that the bandwidth consumption varies widely related to the generated filter.
-        // About 20- 40 MB for upload and 30-130 MB for download at first start up (spv chain).
-        // Afterwards its about 1 MB for upload and 20-80 MB for download.
-        // Probably better then a high FP rate would be to include foreign pubKeyHashes which are tested to not be used 
-        // in many transactions. If we had a pool of 100 000 such keys (2 MB data dump) to random select 4000 we could mix it with our
-        // 1000 own keys and get a similar probability rate as with the current setup but less variation in bandwidth 
-        // consumption.
-
-        // For now to reduce risks with high bandwidth consumption we reduce the FP rate by half.
-        // FP rate = 0,00005;  Nr of false positives: 0,00005 * 56 000 000  = 2800
-        // 1333 / (2800 + 1333) = 0.32 -> 32 % probability that a pub key is in our wallet
-        walletAppKit.setBloomFilterFalsePositiveRate(0.00005);
+        // Bloom filters in Blackcoinj are not used
 
 
         // TODO Get bitcoinj running over our tor proxy. BlockingClientManager need to be used to use the socket  
         // from jtorproxy. To get supported it via nio / netty will be harder
         if (useTor && params.getId().equals(NetworkParameters.ID_MAINNET))
-            walletAppKit.useTor();
+        	walletAppKit.useTor();
+            
 
         // Now configure and start the appkit. This will take a second or two - we could show a temporary splash screen
         // or progress widget to keep the user engaged whilst we initialise, but we don't.
-        if (params == RegTestParams.get()) {
-            if (regTestHost == RegTestHost.REG_TEST_SERVER) {
-                try {
-                    walletAppKit.setPeerNodes(new PeerAddress(InetAddress.getByName(RegTestHost.SERVER_IP), params.getPort()));
-                } catch (UnknownHostException e) {
-                    throw new RuntimeException(e);
-                }
-            } else if (regTestHost == RegTestHost.LOCALHOST) {
-                walletAppKit.connectToLocalHost();   // You should run a regtest mode bitcoind locally.}
-            }
-        } else if (params == MainNetParams.get()) {
-            // Checkpoints are block headers that ship inside our app: for a new user, we pick the last header
-            // in the checkpoints file and then download the rest from the network. It makes things much faster.
-            // Checkpoint files are made using the BuildCheckpoints tool and usually we have to download the
-            // last months worth or more (takes a few seconds).
-            try {
-                walletAppKit.setCheckpoints(getClass().getResourceAsStream("/wallet/checkpoints"));
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error(e.toString());
-            }
-        } else if (params == TestNet3Params.get()) {
-            walletAppKit.setCheckpoints(getClass().getResourceAsStream("/wallet/checkpoints.testnet"));
-        }
 
         walletAppKit.setDownloadListener(downloadListener)
                 .setBlockingStartup(false)

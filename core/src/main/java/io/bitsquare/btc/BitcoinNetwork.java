@@ -23,9 +23,7 @@ import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
 
 public enum BitcoinNetwork {
-    MAINNET(MainNetParams.get()),
-    TESTNET(TestNet3Params.get()),
-    REGTEST(RegTestParams.get());
+    MAINNET(MainNetParams.get());
 
     public static final String KEY = "bitcoin.network";
     public static final BitcoinNetwork DEFAULT = MAINNET;

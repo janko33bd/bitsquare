@@ -448,10 +448,6 @@ public class BSFormatter {
         switch (bitcoinNetwork) {
             case MAINNET:
                 return "Mainnet";
-            case TESTNET:
-                return "Testnet";
-            case REGTEST:
-                return "Regtest";
             default:
                 return "";
         }
