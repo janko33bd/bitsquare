@@ -39,10 +39,7 @@ import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.script.Script;
 import org.bitcoinj.utils.Threading;
-import org.bitcoinj.wallet.CoinSelection;
-import org.bitcoinj.wallet.CoinSelector;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -97,6 +94,8 @@ public class WalletService {
     private final ObjectProperty<List<Peer>> connectedPeers = new SimpleObjectProperty<>();
     public final BooleanProperty shutDownDone = new SimpleBooleanProperty();
     private final Storage<Long> storage;
+    private final Long bloomFilterTweak;
+    private KeyParameter aesKey;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -111,10 +110,17 @@ public class WalletService {
         this.addressEntryList = addressEntryList;
         this.params = preferences.getBitcoinNetwork().getParameters();
         this.walletDir = new File(appDir, "bitcoin");
-        log.info("walletDir "+ walletDir.getPath());
         this.userAgent = userAgent;
         useTor = preferences.getUseTorForBitcoinJ();
-        storage = new Storage<>(walletDir);       
+
+        storage = new Storage<>(walletDir);
+        Long persisted = storage.initAndGetPersisted("BloomFilterNonce");
+        if (persisted != null) {
+            bloomFilterTweak = persisted;
+        } else {
+            bloomFilterTweak = new Random().nextLong();
+            storage.queueUpForSave(bloomFilterTweak, 100);
+        }
     }
 
 
@@ -127,6 +133,7 @@ public class WalletService {
         // we cannot forget to switch threads when adding event handlers. Unfortunately, the DownloadListener
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
+
         Threading.USER_THREAD = UserThread.getExecutor();
 
         Timer timeoutTimer = UserThread.runAfter(() ->
@@ -137,13 +144,14 @@ public class WalletService {
         backupWallet();
 
         // If seed is non-null it means we are restoring from backup.
-        walletAppKit = new WalletAppKit(params, walletDir, "Blacksquare") {
+        walletAppKit = new WalletAppKit(params, walletDir, "Bitsquare") {
             @Override
             protected void onSetupCompleted() {
                 // Don't make the user wait for confirmations for now, as the intention is they're sending it
                 // their own money!
                 walletAppKit.wallet().allowSpendingUnconfirmedTransactions();
-                walletAppKit.peerGroup().setMaxConnections(11);
+                if (params != RegTestParams.get())
+                    walletAppKit.peerGroup().setMaxConnections(11);
 
                 wallet = walletAppKit.wallet();
                 wallet.addEventListener(walletEventListener);
@@ -156,7 +164,7 @@ public class WalletService {
                     }
 
                     @Override
-                    public void onBlocksDownloaded(Peer peer, Block block, int blocksLeft) {
+                    public void onBlocksDownloaded(Peer peer, Block block, FilteredBlock filteredBlock, int blocksLeft) {
                     }
 
                     @Override
@@ -201,17 +209,74 @@ public class WalletService {
             }
         };
 
-        // Bloom filters in Blackcoinj are not used
+        // Bloom filters in BitcoinJ are completely broken
+        // See: https://jonasnick.github.io/blog/2015/02/12/privacy-in-bitcoinj/
+        // Here are a few improvements to fix a few vulnerabilities.
+
+        // Bitsquare's BitcoinJ fork has added a bloomFilterTweak (nonce) setter to reuse the same seed avoiding the trivial vulnerability
+        // by getting the real pub keys by intersections of several filters sent at each startup.
+        walletAppKit.setBloomFilterTweak(bloomFilterTweak);
+
+        // Avoid the simple attack (see: https://jonasnick.github.io/blog/2015/02/12/privacy-in-bitcoinj/) due to the 
+        // default implementation using both pubkey and hash of pubkey
+        walletAppKit.setInsertPubKey(false);
+
+        // Default only 266 keys are generated (2 * 100+33). That would trigger new bloom filters when we are reaching 
+        // the threshold. To avoid reaching the threshold we create much more keys which are unlikely to cause update of the
+        // filter for most users. With lookaheadSize of 500 we get 1333 keys which should be enough for most users to 
+        // never need to update a bloom filter, which would weaken privacy.
+        walletAppKit.setLookaheadSize(500);
+
+        // Calculation is derived from: https://www.reddit.com/r/Bitcoin/comments/2vrx6n/privacy_in_bitcoinj_android_wallet_multibit_hive/coknjuz
+        // Nr of false positives (56M keys in the blockchain): 
+        // First attempt for FP rate:
+        // FP rate = 0,0001;  Nr of false positives: 0,0001 * 56 000 000  = 5600
+        // We have 1333keys: 1333 / (5600 + 1333) = 0.19 -> 19 % probability that a pub key is in our wallet
+        // After tests I found out that the bandwidth consumption varies widely related to the generated filter.
+        // About 20- 40 MB for upload and 30-130 MB for download at first start up (spv chain).
+        // Afterwards its about 1 MB for upload and 20-80 MB for download.
+        // Probably better then a high FP rate would be to include foreign pubKeyHashes which are tested to not be used 
+        // in many transactions. If we had a pool of 100 000 such keys (2 MB data dump) to random select 4000 we could mix it with our
+        // 1000 own keys and get a similar probability rate as with the current setup but less variation in bandwidth 
+        // consumption.
+
+        // For now to reduce risks with high bandwidth consumption we reduce the FP rate by half.
+        // FP rate = 0,00005;  Nr of false positives: 0,00005 * 56 000 000  = 2800
+        // 1333 / (2800 + 1333) = 0.32 -> 32 % probability that a pub key is in our wallet
+        walletAppKit.setBloomFilterFalsePositiveRate(0.00005);
 
 
         // TODO Get bitcoinj running over our tor proxy. BlockingClientManager need to be used to use the socket  
         // from jtorproxy. To get supported it via nio / netty will be harder
         if (useTor && params.getId().equals(NetworkParameters.ID_MAINNET))
-        	walletAppKit.useTor();
-            
+            walletAppKit.useTor();
 
         // Now configure and start the appkit. This will take a second or two - we could show a temporary splash screen
         // or progress widget to keep the user engaged whilst we initialise, but we don't.
+        if (params == RegTestParams.get()) {
+            if (regTestHost == RegTestHost.REG_TEST_SERVER) {
+                try {
+                    walletAppKit.setPeerNodes(new PeerAddress(InetAddress.getByName(RegTestHost.SERVER_IP), params.getPort()));
+                } catch (UnknownHostException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (regTestHost == RegTestHost.LOCALHOST) {
+                walletAppKit.connectToLocalHost();   // You should run a regtest mode bitcoind locally.}
+            }
+        } else if (params == MainNetParams.get()) {
+            // Checkpoints are block headers that ship inside our app: for a new user, we pick the last header
+            // in the checkpoints file and then download the rest from the network. It makes things much faster.
+            // Checkpoint files are made using the BuildCheckpoints tool and usually we have to download the
+            // last months worth or more (takes a few seconds).
+            try {
+                walletAppKit.setCheckpoints(getClass().getResourceAsStream("/wallet/checkpoints"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error(e.toString());
+            }
+        } else if (params == TestNet3Params.get()) {
+            walletAppKit.setCheckpoints(getClass().getResourceAsStream("/wallet/checkpoints.testnet"));
+        }
 
         walletAppKit.setDownloadListener(downloadListener)
                 .setBlockingStartup(false)
@@ -271,6 +336,10 @@ public class WalletService {
             log.error("Could not delete directory " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void setAesKey(KeyParameter aesKey) {
+        this.aesKey = aesKey;
     }
 
 
@@ -507,22 +576,24 @@ public class WalletService {
     public Coin getRequiredFee(String fromAddress,
                                String toAddress,
                                Coin amount,
-                               AddressEntry.Context context) throws AddressFormatException, AddressEntryException {
+                               AddressEntry.Context context)
+            throws AddressFormatException, AddressEntryException {
         Optional<AddressEntry> addressEntry = findAddressEntry(fromAddress, context);
         if (!addressEntry.isPresent())
             throw new AddressEntryException("WithdrawFromAddress is not found in our wallet.");
 
         checkNotNull(addressEntry.get().getAddress(), "addressEntry.get().getAddress() must nto be null");
-        CoinSelector selector = new TradeWalletCoinSelector(params, addressEntry.get().getAddress());
-        return getFee(toAddress,
+        return getFee(fromAddress,
+                toAddress,
                 amount,
-                selector);
+                context,
+                Coin.ZERO);
     }
 
     public Coin getRequiredFeeForMultipleAddresses(Set<String> fromAddresses,
                                                    String toAddress,
-                                                   Coin amount) throws AddressFormatException,
-            AddressEntryException {
+                                                   Coin amount)
+            throws AddressFormatException, AddressEntryException {
         Set<AddressEntry> addressEntries = fromAddresses.stream()
                 .map(address -> {
                     Optional<AddressEntry> addressEntryOptional = findAddressEntry(address, AddressEntry.Context.AVAILABLE);
@@ -539,63 +610,55 @@ public class WalletService {
                 .collect(Collectors.toSet());
         if (addressEntries.isEmpty())
             throw new AddressEntryException("No Addresses for withdraw  found in our wallet");
-
-        CoinSelector selector = new MultiAddressesCoinSelector(params, addressEntries);
-        return getFee(toAddress,
+        return getFeeForMultipleAddresses(fromAddresses,
+                toAddress,
                 amount,
-                selector);
+                Coin.ZERO);
     }
 
-    private Coin getFee(String toAddress,
-                        Coin amount,
-                        CoinSelector selector) throws AddressFormatException, AddressEntryException {
-        List<TransactionOutput> candidates = wallet.calculateAllSpendCandidates();
-        CoinSelection bestCoinSelection = selector.select(params.getMaxMoney(), candidates);
-        Transaction tx = new Transaction(params);
-        tx.addOutput(amount, new Address(params, toAddress));
-        if (!adjustOutputDownwardsForFee(tx, bestCoinSelection, Coin.ZERO, FeePolicy.getNonTradeFeePerKb()))
-            throw new Wallet.CouldNotAdjustDownwards();
 
-        Coin fee = amount.subtract(tx.getOutput(0).getValue());
-        log.info("Required fee " + fee);
+    private Coin getFee(String fromAddress,
+                        String toAddress,
+                        Coin amount,
+                        AddressEntry.Context context,
+                        Coin fee) throws AddressEntryException, AddressFormatException {
+        try {
+            wallet.completeTx(getSendRequest(fromAddress, toAddress, amount, aesKey, context));
+        } catch (InsufficientMoneyException e) {
+            if (e.missing != null) {
+                log.trace("missing fee " + e.missing.toFriendlyString());
+                fee = fee.add(e.missing);
+                amount = amount.subtract(fee);
+                return getFee(fromAddress,
+                        toAddress,
+                        amount,
+                        context,
+                        fee);
+            }
+        }
+        log.trace("result fee " + fee.toFriendlyString());
         return fee;
     }
 
-    private boolean adjustOutputDownwardsForFee(Transaction tx, CoinSelection coinSelection, Coin baseFee, Coin feePerKb) {
-        TransactionOutput output = tx.getOutput(0);
-        // Check if we need additional fee due to the transaction's size
-        int size = tx.bitcoinSerialize().length;
-        size += estimateBytesForSigning(coinSelection);
-        Coin fee = baseFee.add(feePerKb.multiply((size / 1000) + 1));
-        output.setValue(output.getValue().subtract(fee));
-        // Check if we need additional fee due to the output's value
-        if (output.getValue().compareTo(Coin.CENT) < 0 && fee.compareTo(Transaction.REFERENCE_DEFAULT_MIN_TX_FEE) < 0)
-            output.setValue(output.getValue().subtract(Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.subtract(fee)));
-        return output.getMinNonDustValue().compareTo(output.getValue()) <= 0;
-    }
-
-    private int estimateBytesForSigning(CoinSelection selection) {
-        int size = 0;
-        for (TransactionOutput output : selection.gathered) {
-            try {
-                Script script = output.getScriptPubKey();
-                ECKey key = null;
-                Script redeemScript = null;
-                if (script.isSentToAddress()) {
-                    key = wallet.findKeyFromPubHash(script.getPubKeyHash());
-                    checkNotNull(key, "Coin selection includes unspendable outputs");
-                } else if (script.isPayToScriptHash()) {
-                    redeemScript = wallet.findRedeemDataFromScriptHash(script.getPubKeyHash()).redeemScript;
-                    checkNotNull(redeemScript, "Coin selection includes unspendable outputs");
-                }
-                size += script.getNumberOfBytesRequiredToSpend(key, redeemScript);
-            } catch (ScriptException e) {
-                // If this happens it means an output script in a wallet tx could not be understood. That should never
-                // happen, if it does it means the wallet has got into an inconsistent state.
-                throw new IllegalStateException(e);
+    private Coin getFeeForMultipleAddresses(Set<String> fromAddresses,
+                                            String toAddress,
+                                            Coin amount,
+                                            Coin fee) throws AddressEntryException, AddressFormatException {
+        try {
+            wallet.completeTx(getSendRequestForMultipleAddresses(fromAddresses, toAddress, amount, null, aesKey));
+        } catch (InsufficientMoneyException e) {
+            if (e.missing != null) {
+                log.trace("missing fee " + e.missing.toFriendlyString());
+                fee = fee.add(e.missing);
+                amount = amount.subtract(fee);
+                return getFeeForMultipleAddresses(fromAddresses,
+                        toAddress,
+                        amount,
+                        fee);
             }
         }
-        return size;
+        log.trace("result fee " + fee.toFriendlyString());
+        return fee;
     }
 
 
@@ -659,7 +722,7 @@ public class WalletService {
             AddressEntryException, InsufficientMoneyException {
         Transaction tx = new Transaction(params);
         Preconditions.checkArgument(Restrictions.isAboveDust(amount),
-                "You cannot send an amount which are smaller than 546 satoshis.");
+                "The amount is too low (dust limit).");
         tx.addOutput(amount, new Address(params, toAddress));
 
         Wallet.SendRequest sendRequest = Wallet.SendRequest.forTx(tx);
@@ -684,7 +747,7 @@ public class WalletService {
             AddressFormatException, AddressEntryException, InsufficientMoneyException {
         Transaction tx = new Transaction(params);
         Preconditions.checkArgument(Restrictions.isAboveDust(amount),
-                "You cannot send an amount which are smaller than 546 satoshis.");
+                "The amount is too low (dust limit).");
         tx.addOutput(amount, new Address(params, toAddress));
 
         Wallet.SendRequest sendRequest = Wallet.SendRequest.forTx(tx);
