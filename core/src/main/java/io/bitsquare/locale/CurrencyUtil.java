@@ -80,7 +80,6 @@ public class CurrencyUtil {
         result.add(new CryptoCurrency("DOGE", "Dogecoin"));
         result.add(new CryptoCurrency("NXT", "Nxt"));
         result.add(new CryptoCurrency("BTS", "BitShares"));
-        result.add(new CryptoCurrency("BLK", "Blackcoin"));
         return result;
     }
 

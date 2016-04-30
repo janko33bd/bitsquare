@@ -316,7 +316,7 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
         placeholder.setWrapText(true);
         tableView.setPlaceholder(placeholder);
 
-        Label titleLabel = new Label(direction.equals(Offer.Direction.BUY) ? "Top 3 offers for buying bitcoin  (bid)" : "Top 3 offers for selling bitcoin  (ask)");
+        Label titleLabel = new Label(direction.equals(Offer.Direction.BUY) ? "Top 3 offers for buying blackcoin  (bid)" : "Top 3 offers for selling blackcoin  (ask)");
         titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16; -fx-alignment: center");
         UserThread.execute(() -> titleLabel.prefWidthProperty().bind(tableView.widthProperty()));
 
@@ -326,7 +326,7 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
         iconView.setId(isSellOffer ? "image-buy-white" : "image-sell-white");
         button.setGraphic(iconView);
         button.setGraphicTextGap(10);
-        button.setText(isSellOffer ? "I want to buy bitcoin" : "I want to sell bitcoin");
+        button.setText(isSellOffer ? "I want to buy blackcoin" : "I want to sell blackcoin");
         button.setMinHeight(40);
         button.setId(isSellOffer ? "buy-button-big" : "sell-button-big");
         button.setOnAction(e -> navigation.navigateTo(MainView.class, isSellOffer ? BuyOfferView.class : SellOfferView.class));
@@ -355,10 +355,10 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
         yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis, "", ""));
 
         seriesBuy = new XYChart.Series();
-        seriesBuy.setName("Offers for buying bitcoin   ");
+        seriesBuy.setName("Offers for buying blackcoin   ");
 
         seriesSell = new XYChart.Series();
-        seriesSell.setName("Offers for selling bitcoin ");
+        seriesSell.setName("Offers for selling blackcoin ");
 
         areaChart = new AreaChart<>(xAxis, yAxis);
         areaChart.setAnimated(false);
