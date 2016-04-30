@@ -724,7 +724,7 @@ public class MainViewModel implements ViewModel {
                 marketPriceCurrency, marketPrice, marketPriceInverted, preferences.useInvertedMarketPriceProperty(),
                 (marketPriceCurrency, marketPrice, marketPriceInverted, useInvertedMarketPrice) ->
                         (useInvertedMarketPrice ? marketPriceInverted : marketPrice) +
-                                (useInvertedMarketPrice ? " BLK/" + marketPriceCurrency : " " + marketPriceCurrency + "/BLK"));
+                                (useInvertedMarketPrice ? " !! BTC !!/" + marketPriceCurrency : " " + marketPriceCurrency + "/!! BTC !!"));
 
         marketPriceBinding.subscribe((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.equals(oldValue)) {
@@ -774,7 +774,7 @@ public class MainViewModel implements ViewModel {
             MarketPrice marketPrice = priceFeed.getMarketPrice(currencyCode);
             boolean useInvertedMarketPrice = preferences.getUseInvertedMarketPrice();
             String priceString;
-            String currencyPairString = useInvertedMarketPrice ? "BLK/" + currencyCode : currencyCode + "/BLK";
+            String currencyPairString = useInvertedMarketPrice ? "!! BTC !!/" + currencyCode : currencyCode + "/!! BTC !!";
             if (marketPrice != null) {
                 double price = marketPrice.getPrice(priceFeed.getType());
                 if (price != 0) {

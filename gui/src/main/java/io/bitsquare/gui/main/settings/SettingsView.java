@@ -58,8 +58,8 @@ public class SettingsView extends ActivatableViewAndModel<TabPane, Activatable> 
                 navigation.navigateTo(MainView.class, SettingsView.class, PreferencesView.class);
             else if (newValue == networkSettingsTab)
                 navigation.navigateTo(MainView.class, SettingsView.class, NetworkSettingsView.class);
-            else if (newValue == aboutTab)
-                navigation.navigateTo(MainView.class, SettingsView.class, AboutView.class);
+//            else if (newValue == aboutTab)
+//                navigation.navigateTo(MainView.class, SettingsView.class, AboutView.class);
         };
     }
 
@@ -73,8 +73,8 @@ public class SettingsView extends ActivatableViewAndModel<TabPane, Activatable> 
             navigation.navigateTo(MainView.class, SettingsView.class, PreferencesView.class);
         else if (selectedItem == networkSettingsTab)
             navigation.navigateTo(MainView.class, SettingsView.class, NetworkSettingsView.class);
-        else if (selectedItem == aboutTab)
-            navigation.navigateTo(MainView.class, SettingsView.class, AboutView.class);
+//        else if (selectedItem == aboutTab)
+//            navigation.navigateTo(MainView.class, SettingsView.class, AboutView.class);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class SettingsView extends ActivatableViewAndModel<TabPane, Activatable> 
 
         if (view instanceof PreferencesView) tab = preferencesTab;
         else if (view instanceof NetworkSettingsView) tab = networkSettingsTab;
-        else if (view instanceof AboutView) tab = aboutTab;
+        //else if (view instanceof AboutView) tab = aboutTab;
         else throw new IllegalArgumentException("Navigation to " + viewClass + " is not supported");
 
         tab.setContent(view.getRoot());

@@ -27,5 +27,5 @@
 
     <Tab fx:id="preferencesTab" text="Settings" closable="false"/>
     <Tab fx:id="networkSettingsTab" text="Network info" closable="false"/>
-    <Tab fx:id="aboutTab" text="About" closable="false"/>
+<!--    <Tab fx:id="aboutTab" text="About" closable="false"/> -->
 </TabPane>
