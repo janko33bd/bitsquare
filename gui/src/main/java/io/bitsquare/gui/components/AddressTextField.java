@@ -53,7 +53,7 @@ public class AddressTextField extends AnchorPane {
         textField.setId("address-text-field");
         textField.setEditable(false);
         textField.textProperty().bind(address);
-        String tooltipText = "Open your default bitcoin wallet";
+        String tooltipText = "Open your default blackcoin wallet";
         Tooltip.install(textField, new Tooltip(tooltipText));
         textField.setOnMouseClicked(mouseEvent -> openExtWallet());
         textField.focusTraversableProperty().set(focusTraversableProperty().get());
@@ -90,7 +90,7 @@ public class AddressTextField extends AnchorPane {
             Utilities.openURI(URI.create(getBitcoinURI()));
         } catch (Exception e) {
             log.warn(e.getMessage());
-            new Popup().warning("Opening a default bitcoin wallet application has failed. " +
+            new Popup().warning("Opening a default blackcoin wallet application has failed. " +
                     "Perhaps you don't have one installed?").show();
         }
     }

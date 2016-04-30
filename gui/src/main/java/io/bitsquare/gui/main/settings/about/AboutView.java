@@ -47,7 +47,7 @@ public class AboutView extends ActivatableViewAndModel<GridPane, Activatable> {
         TitledGroupBg titledGroupBg = addTitledGroupBg(root, gridRow, 4, "About Bitsquare");
         GridPane.setColumnSpan(titledGroupBg, 2);
         Label label = addLabel(root, gridRow, "Bitsquare is an open source project and a decentralized network of users who want to " +
-                "exchange Bitcoin with national currencies or alternative crypto currencies in a privacy protecting way.\n" +
+                "exchange Blackcoin with national currencies or alternative crypto currencies in a privacy protecting way.\n" +
                 "Learn more about Bitsquare on our project web page.", Layout.FIRST_ROW_DISTANCE);
         label.setWrapText(true);
         GridPane.setColumnSpan(label, 2);

@@ -139,7 +139,7 @@ public class BitsquareApp extends Application {
             injector = Guice.createInjector(bitsquareAppModule);
             injector.getInstance(InjectorViewFactory.class).setInjector(injector);
 
-            Version.setBtcNetworkId(injector.getInstance(BitsquareEnvironment.class).getBitcoinNetwork().ordinal());
+            Version.setBtcNetworkId(3);
 
             if (Utilities.isLinux())
                 System.setProperty("prism.lcdtext", "false");

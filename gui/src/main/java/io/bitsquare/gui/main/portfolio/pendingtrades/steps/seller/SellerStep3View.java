@@ -81,7 +81,7 @@ public class SellerStep3View extends TradeStepView {
                 } else {
                     message = "Your trading partner has confirmed that he initiated the " + currencyName + " payment.\n\n" +
                             "Please go to your online banking web page and check if you have received " +
-                            tradeAmountWithCode + " from the bitcoin buyer.\n\n" +
+                            tradeAmountWithCode + " from the blackcoin buyer.\n\n" +
                             "The trade ID (\"reason for payment\" text) of the transaction is: \"" + trade.getShortId() + "\"";
                 }
                 if (!BitsquareApp.DEV_MODE && preferences.showAgain(key)) {
@@ -182,11 +182,11 @@ public class SellerStep3View extends TradeStepView {
     @Override
     protected String getInfoText() {
         if (model.isBlockChainMethod()) {
-            return "The bitcoin buyer has started the " + model.dataModel.getCurrencyCode() + " payment.\n" +
+            return "The blackcoin buyer has started the " + model.dataModel.getCurrencyCode() + " payment.\n" +
                     "Check for blockchain confirmations at your cryptocurrency wallet or block explorer and " +
                     "confirm the payment when you have sufficient blockchain confirmations.";
         } else {
-            return "The bitcoin buyer has started the " + model.dataModel.getCurrencyCode() + " payment.\n" +
+            return "The blackcoin buyer has started the " + model.dataModel.getCurrencyCode() + " payment.\n" +
                     "Check at your payment account (e.g. bank account) and confirm when you have " +
                     "received the payment.";
         }
@@ -243,7 +243,7 @@ public class SellerStep3View extends TradeStepView {
                         .confirmation("Have you received the " + CurrencyUtil.getNameByCode(model.dataModel.getCurrencyCode()) +
                                 " payment from your trading partner?\n\n" +
                                 "Please note that as soon you have confirmed the receipt, the locked trade amount will be released " +
-                                "to the bitcoin buyer and the security deposit will be refunded.")
+                                "to the blackcoin buyer and the security deposit will be refunded.")
                         .width(700)
                         .actionButtonText("Yes, I have received the payment")
                         .onAction(this::confirmPaymentReceived)

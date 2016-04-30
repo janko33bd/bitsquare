@@ -167,7 +167,7 @@ public class NotificationCenter {
                         message = "Your offer has been accepted by a buyer.";
                         break;
                     case SELLER_RECEIVED_FIAT_PAYMENT_INITIATED_MSG:
-                        message = "The bitcoin buyer has started the payment.";
+                        message = "The blackcoin buyer has started the payment.";
                         break;
                 }
             }

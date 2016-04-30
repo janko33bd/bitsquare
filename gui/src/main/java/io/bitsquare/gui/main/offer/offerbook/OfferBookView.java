@@ -220,7 +220,7 @@ public class OfferBookView extends ActivatableViewAndModel<GridPane, OfferBookVi
                     String tradeCurrencyCode = model.tradeCurrencyCode.get();
                     boolean showAllTradeCurrencies = model.showAllTradeCurrenciesProperty.get();
                     priceColumn.setText(!showAllTradeCurrencies ?
-                            "Price in " + tradeCurrencyCode + "/BTC" :
+                            "Price in " + tradeCurrencyCode + "/BLK" :
                             "Price");
                     return !showAllTradeCurrencies ?
                             "Amount in " + tradeCurrencyCode + " (Min.)" :
@@ -272,9 +272,9 @@ public class OfferBookView extends ActivatableViewAndModel<GridPane, OfferBookVi
         String postFix = selectedTradeCurrency instanceof FiatCurrency || model.showAllTradeCurrenciesProperty.get() ? "" :
                 " (" + mirroredDirectionText + " " + selectedTradeCurrency.getName() + ")";
 
-        // offerBookTitle.setText("Offers for " + directionText + " bitcoin" + postFix);
+        // offerBookTitle.setText("Offers for " + directionText + " blackcoin" + postFix);
         offerBookTitle.setText("Available offers");
-        createOfferButton.setText("Create new offer for " + directionText + " bitcoin" + postFix);
+        createOfferButton.setText("Create new offer for " + directionText + " blackcoin" + postFix);
     }
 
     public void setOfferActionHandler(OfferView.OfferActionHandler offerActionHandler) {
@@ -382,7 +382,7 @@ public class OfferBookView extends ActivatableViewAndModel<GridPane, OfferBookVi
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     private TableColumn<OfferBookListItem, OfferBookListItem> getAmountColumn() {
-        TableColumn<OfferBookListItem, OfferBookListItem> column = new TableColumn<OfferBookListItem, OfferBookListItem>("Amount in BTC (Min.)") {
+        TableColumn<OfferBookListItem, OfferBookListItem> column = new TableColumn<OfferBookListItem, OfferBookListItem>("Amount in BLK (Min.)") {
             {
                 setMinWidth(130);
             }

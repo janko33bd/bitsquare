@@ -60,8 +60,8 @@ public class SeedNode {
                     String arg1 = args[1];
                     int networkId = Integer.parseInt(arg1);
                     log.info("From processArgs: networkId=" + networkId);
-                    checkArgument(networkId > -1 && networkId < 3,
-                            "networkId out of scope (Mainnet = 0, TestNet = 1, Regtest = 2)");
+                    checkArgument(networkId > -1 && networkId < 4,
+                            "networkId out of scope (Mainnet = 0, TestNet = 1, Regtest = 2, Blackcoin = 3)");
                     Version.setBtcNetworkId(networkId);
                     if (args.length > 2) {
                         String arg2 = args[2];

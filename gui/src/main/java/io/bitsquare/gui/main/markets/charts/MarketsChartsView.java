@@ -147,17 +147,17 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
                     String code = tradeCurrency.getCode();
                     String tradeCurrencyName = tradeCurrency.getName();
                     areaChart.setTitle("Offer book for " + tradeCurrencyName);
-                    priceColumnLabel.set("Price (" + code + "/BTC)");
+                    priceColumnLabel.set("Price (" + code + "/BLK)");
                     volumeColumnLabel.set("Volume (" + code + ")");
                     xAxis.setLabel(priceColumnLabel.get());
                     xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis, "", ""));
 
                     if (CurrencyUtil.isCryptoCurrency(code)) {
-                        buyOfferButton.setText("I want to sell bitcoin / buy " + tradeCurrencyName);
-                        sellOfferButton.setText("I want to buy bitcoin / sell " + tradeCurrencyName);
+                        buyOfferButton.setText("I want to sell blackcoin / buy " + tradeCurrencyName);
+                        sellOfferButton.setText("I want to buy blackcoin / sell " + tradeCurrencyName);
                     } else {
-                        buyOfferButton.setText("I want to sell bitcoin");
-                        sellOfferButton.setText("I want to buy bitcoin");
+                        buyOfferButton.setText("I want to sell blackcoin");
+                        sellOfferButton.setText("I want to buy blackcoin");
                     }
                 });
 
@@ -229,8 +229,8 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
         tableView.getColumns().add(priceColumn);
 
         // amount
-        TableColumn<Offer, Offer> amountColumn = new TableColumn<>("Amount (BTC)");
-        amountColumn.setText("Amount (BTC)");
+        TableColumn<Offer, Offer> amountColumn = new TableColumn<>("Amount (BLK)");
+        amountColumn.setText("Amount (BLK)");
         amountColumn.setMinWidth(125);
         amountColumn.setMaxWidth(125);
         amountColumn.setSortable(false);
@@ -337,7 +337,7 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
         iconView.setId(isSellOffer ? "image-buy-white" : "image-sell-white");
         button.setGraphic(iconView);
         button.setGraphicTextGap(10);
-        button.setText(isSellOffer ? "I want to buy bitcoin" : "I want to sell bitcoin");
+        button.setText(isSellOffer ? "I want to buy blackcoin" : "I want to sell blackcoin");
         button.setMinHeight(40);
         button.setId(isSellOffer ? "buy-button-big" : "sell-button-big");
         button.setOnAction(e -> navigation.navigateTo(MainView.class, isSellOffer ? BuyOfferView.class : SellOfferView.class));
@@ -362,7 +362,7 @@ public class MarketsChartsView extends ActivatableViewAndModel<VBox, MarketsChar
         yAxis = new NumberAxis();
         yAxis.setForceZeroInRange(false);
         yAxis.setAutoRanging(true);
-        yAxis.setLabel("Amount in BTC");
+        yAxis.setLabel("Amount in BLK");
         yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis, "", ""));
 
         seriesBuy = new XYChart.Series();

@@ -239,8 +239,8 @@ public class MainViewModel implements ViewModel {
         MainView.blur();
         String details;
         if (!walletInitialized.get()) {
-            details = "You still did not get connected to the bitcoin network.\n" +
-                    "If you use Tor for Bitcoin it might be that you got an unstable Tor path.\n" +
+            details = "You still did not get connected to the blackcoin network.\n" +
+                    "If you use Tor for Blackcoin it might be that you got an unstable Tor path.\n" +
                     "You can wait longer or try to restart.";
         } else if (!p2pNetWorkReady.get()) {
             details = "You still did not get connected to the P2P network.\n" +
@@ -411,18 +411,18 @@ public class MainViewModel implements ViewModel {
                             result = numPeersString + " / connecting to " + btcNetworkAsString;
                         }
                     } else {
-                        result = "Nr. of Bitcoin network peers: " + numBtcPeers + " / connecting to " + btcNetworkAsString + " failed";
+                        result = "Nr. of Blackcoin network peers: " + numBtcPeers + " / connecting to " + btcNetworkAsString + " failed";
                         if (exception instanceof TimeoutException) {
-                            walletServiceErrorMsg.set("Connecting to the bitcoin network failed because of a timeout.");
+                            walletServiceErrorMsg.set("Connecting to the blackcoin network failed because of a timeout.");
                         } else if (exception.getCause() instanceof BlockStoreException) {
                             new Popup().warning("Bitsquare is already running. You cannot run 2 instances of Bitsquare.")
                                     .closeButtonText("Shut down")
                                     .onClose(BitsquareApp.shutDownHandler::run)
                                     .show();
                         } else if (exception.getMessage() != null) {
-                            walletServiceErrorMsg.set("Connection to the bitcoin network failed because of an error:" + exception.getMessage());
+                            walletServiceErrorMsg.set("Connection to the blackcoin network failed because of an error:" + exception.getMessage());
                         } else {
-                            walletServiceErrorMsg.set("Connection to the bitcoin network failed because of an error:" + exception.toString());
+                            walletServiceErrorMsg.set("Connection to the blackcoin network failed because of an error:" + exception.toString());
                         }
                     }
                     return result;
@@ -690,7 +690,7 @@ public class MainViewModel implements ViewModel {
                 checkNumberOfBtcPeersTimer = UserThread.runAfter(() -> {
                     // check again numPeers
                     if (walletService.numPeersProperty().get() == 0) {
-                        walletServiceErrorMsg.set("You lost the connection to all bitcoin network peers.\n" +
+                        walletServiceErrorMsg.set("You lost the connection to all blackcoin network peers.\n" +
                                 "Maybe you lost your internet connection or your computer was in standby mode.");
                     } else {
                         walletServiceErrorMsg.set(null);
@@ -724,7 +724,7 @@ public class MainViewModel implements ViewModel {
                 marketPriceCurrency, marketPrice, marketPriceInverted, preferences.useInvertedMarketPriceProperty(),
                 (marketPriceCurrency, marketPrice, marketPriceInverted, useInvertedMarketPrice) ->
                         (useInvertedMarketPrice ? marketPriceInverted : marketPrice) +
-                                (useInvertedMarketPrice ? " BTC/" + marketPriceCurrency : " " + marketPriceCurrency + "/BTC"));
+                                (useInvertedMarketPrice ? " BLK/" + marketPriceCurrency : " " + marketPriceCurrency + "/BLK"));
 
         marketPriceBinding.subscribe((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.equals(oldValue)) {
@@ -774,7 +774,7 @@ public class MainViewModel implements ViewModel {
             MarketPrice marketPrice = priceFeed.getMarketPrice(currencyCode);
             boolean useInvertedMarketPrice = preferences.getUseInvertedMarketPrice();
             String priceString;
-            String currencyPairString = useInvertedMarketPrice ? "BTC/" + currencyCode : currencyCode + "/BTC";
+            String currencyPairString = useInvertedMarketPrice ? "BLK/" + currencyCode : currencyCode + "/BLK";
             if (marketPrice != null) {
                 double price = marketPrice.getPrice(priceFeed.getType());
                 if (price != 0) {

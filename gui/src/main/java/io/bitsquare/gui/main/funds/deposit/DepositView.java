@@ -155,7 +155,7 @@ public class DepositView extends ActivatableView<VBox, Void> {
         addressTextField.setPaymentLabel(paymentLabelString);
 
 
-        Tuple2<Label, InputTextField> amountTuple = addLabelInputTextField(gridPane, ++gridRow, "Amount in BTC (optional):");
+        Tuple2<Label, InputTextField> amountTuple = addLabelInputTextField(gridPane, ++gridRow, "Amount in BLK (optional):");
         amountLabel = amountTuple.first;
         amountTextField = amountTuple.second;
         if (BitsquareApp.DEV_MODE)

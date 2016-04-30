@@ -72,22 +72,22 @@ public class BuyerStep2View extends TradeStepView {
                                 "(You can wait for more confirmations if you want - 6 confirmations are considered as very secure.)\n\n" +
                                 "Please transfer from your external " +
                                 CurrencyUtil.getNameByCode(trade.getOffer().getCurrencyCode()) + " wallet\n" +
-                                model.formatter.formatFiatWithCode(trade.getTradeVolume()) + " to the bitcoin seller.\n\n" +
-                                "Here are the payment account details of the bitcoin seller:\n" +
+                                model.formatter.formatFiatWithCode(trade.getTradeVolume()) + " to the blackcoin seller.\n\n" +
+                                "Here are the payment account details of the blackcoin seller:\n" +
                                 "" + paymentAccountContractData.getPaymentDetailsForTradePopup() + ".\n\n" +
                                 "(You can copy & paste the values from the main screen after closing that popup.)";
                     else if (paymentAccountContractData != null)
                         message = "Your trade has reached at least one blockchain confirmation.\n" +
                                 "(You can wait for more confirmations if you want - 6 confirmations are considered as very secure.)\n\n" +
                                 "Please go to your online banking web page and pay " +
-                                model.formatter.formatFiatWithCode(trade.getTradeVolume()) + " to the bitcoin seller.\n\n" +
-                                "Here are the payment account details of the bitcoin seller:\n" +
+                                model.formatter.formatFiatWithCode(trade.getTradeVolume()) + " to the blackcoin seller.\n\n" +
+                                "Here are the payment account details of the blackcoin seller:\n" +
                                 "" + paymentAccountContractData.getPaymentDetailsForTradePopup() + ".\n" +
                                 "(You can copy & paste the values from the main screen after closing that popup.)\n\n" +
                                 "Please don't forget to add the trade ID \"" + trade.getShortId() +
                                 "\" as \"reason for payment\" so the receiver can assign your payment to this trade.\n\n" +
                                 "DO NOT use any additional notice in the \"reason for payment\" text like " +
-                                "Bitcoin, Btc or Bitsquare.\n\n" +
+                                "Blackcoin, Blk or Bitsquare.\n\n" +
                                 "If your bank charges fees you have to cover those fees.";
 
                     if (!BitsquareApp.DEV_MODE && preferences.showAgain(key)) {

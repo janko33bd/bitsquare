@@ -167,11 +167,11 @@ public class OfferDetailsWindow extends Overlay<OfferDetailsWindow> {
             addLabelTextField(gridPane, rowIndex, "Offer type:", formatter.getDirectionBothSides(direction), Layout.FIRST_ROW_DISTANCE);
         }
         if (takeOfferHandlerOptional.isPresent()) {
-            addLabelTextField(gridPane, ++rowIndex, "Bitcoin amount" + btcDirectionInfo, formatter.formatCoinWithCode(tradeAmount));
+            addLabelTextField(gridPane, ++rowIndex, "Blackcoin amount" + btcDirectionInfo, formatter.formatCoinWithCode(tradeAmount));
             addLabelTextField(gridPane, ++rowIndex, CurrencyUtil.getNameByCode(offer.getCurrencyCode()) + " amount" + fiatDirectionInfo, formatter.formatFiatWithCode(offer.getVolumeByAmount(tradeAmount)));
         } else {
-            addLabelTextField(gridPane, ++rowIndex, "Bitcoin amount" + btcDirectionInfo, formatter.formatCoinWithCode(offer.getAmount()));
-            addLabelTextField(gridPane, ++rowIndex, "Min. bitcoin amount:", formatter.formatCoinWithCode(offer.getMinAmount()));
+            addLabelTextField(gridPane, ++rowIndex, "Blackcoin amount" + btcDirectionInfo, formatter.formatCoinWithCode(offer.getAmount()));
+            addLabelTextField(gridPane, ++rowIndex, "Min. blackcoin amount:", formatter.formatCoinWithCode(offer.getMinAmount()));
             String amount = formatter.formatFiatWithCode(offer.getOfferVolume());
             String minVolume = "";
             if (!offer.getAmount().equals(offer.getMinAmount()))
@@ -180,7 +180,7 @@ public class OfferDetailsWindow extends Overlay<OfferDetailsWindow> {
         }
 
         if (takeOfferHandlerOptional.isPresent()) {
-            addLabelTextField(gridPane, ++rowIndex, "Price:", formatter.formatFiat(tradePrice) + " " + offer.getCurrencyCode() + "/" + "BTC");
+            addLabelTextField(gridPane, ++rowIndex, "Price:", formatter.formatFiat(tradePrice) + " " + offer.getCurrencyCode() + "/" + "BLK");
         } else {
             Fiat price = offer.getPrice();
             if (offer.getUseMarketBasedPrice()) {
@@ -268,8 +268,8 @@ public class OfferDetailsWindow extends Overlay<OfferDetailsWindow> {
         boolean isBuyOffer = offer.getDirection() == Offer.Direction.BUY;
         boolean isBuyerRole = isPlaceOffer ? isBuyOffer : !isBuyOffer;
 
-        String placeOfferButtonText = isBuyerRole ? "Confirm offer for buying bitcoin" : "Confirm offer for selling bitcoin";
-        String takeOfferButtonText = isBuyerRole ? "Confirm offer for buying bitcoin" : "Confirm offer for selling bitcoin";
+        String placeOfferButtonText = isBuyerRole ? "Confirm offer for buying blackcoin" : "Confirm offer for selling blackcoin";
+        String takeOfferButtonText = isBuyerRole ? "Confirm offer for buying blackcoin" : "Confirm offer for selling blackcoin";
 
         ImageView iconView = new ImageView();
         iconView.setId(isBuyerRole ? "image-buy-white" : "image-sell-white");

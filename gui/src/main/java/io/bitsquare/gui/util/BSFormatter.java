@@ -218,7 +218,7 @@ public class BSFormatter {
     }
 
     public String formatPriceWithCode(Fiat fiat) {
-        return formatFiatWithCode(fiat) + "/BTC";
+        return formatFiatWithCode(fiat) + "/BLK";
     }
 
     private Fiat parseToFiat(String input, String currencyCode) {
@@ -277,7 +277,7 @@ public class BSFormatter {
 
 
     public String getDirection(Offer.Direction direction) {
-        return getDirection(direction, false) + " bitcoin";
+        return getDirection(direction, false) + " blackcoin";
     }
 
     private String getDirection(Offer.Direction direction, boolean allUpperCase) {
@@ -454,28 +454,28 @@ public class BSFormatter {
     }
 
     public String getDirectionBothSides(Offer.Direction direction) {
-        return direction == Offer.Direction.BUY ? "Offerer as bitcoin buyer / Taker as bitcoin seller" :
-                "Offerer as bitcoin seller / Taker as bitcoin buyer";
+        return direction == Offer.Direction.BUY ? "Offerer as blackcoin buyer / Taker as blackcoin seller" :
+                "Offerer as blackcoin seller / Taker as blackcoin buyer";
     }
 
     public String getDirectionForBuyer(boolean isMyOffer) {
-        return isMyOffer ? "You are buying bitcoin as offerer / Taker is selling bitcoin" :
-                "You are buying bitcoin as taker / Offerer is selling bitcoin";
+        return isMyOffer ? "You are buying blackcoin as offerer / Taker is selling blackcoin" :
+                "You are buying blackcoin as taker / Offerer is selling blackcoin";
     }
 
     public String getDirectionForSeller(boolean isMyOffer) {
-        return isMyOffer ? "You are selling bitcoin as offerer / Taker is buying bitcoin" :
-                "You are selling bitcoin as taker / Offerer is buying bitcoin";
+        return isMyOffer ? "You are selling blackcoin as offerer / Taker is buying blackcoin" :
+                "You are selling blackcoin as taker / Offerer is buying blackcoin";
     }
 
     public String getDirectionForTakeOffer(Offer.Direction direction) {
-        return direction == Offer.Direction.BUY ? "You are selling bitcoin (by taking an offer from someone who wants to buy bitcoin)" :
-                "You are buying bitcoin (by taking an offer from someone who wants to sell bitcoin)";
+        return direction == Offer.Direction.BUY ? "You are selling blackcoin (by taking an offer from someone who wants to buy blackcoin)" :
+                "You are buying blackcoin (by taking an offer from someone who wants to sell blackcoin)";
     }
 
     public String getOfferDirectionForCreateOffer(Offer.Direction direction) {
-        return direction == Offer.Direction.BUY ? "You are creating an offer for buying bitcoin" :
-                "You are creating an offer for selling bitcoin";
+        return direction == Offer.Direction.BUY ? "You are creating an offer for buying blackcoin" :
+                "You are creating an offer for selling blackcoin";
     }
 
     public String getRole(boolean isBuyerOffererAndSellerTaker, boolean isOfferer) {

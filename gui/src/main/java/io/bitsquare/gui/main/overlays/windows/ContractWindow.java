@@ -125,9 +125,9 @@ public class ContractWindow extends Overlay<ContractWindow> {
         addLabelTextField(gridPane, ++rowIndex, "Trade type:", formatter.getDirectionBothSides(offer.getDirection()));
         addLabelTextField(gridPane, ++rowIndex, "Trade price:", formatter.formatFiat(contract.getTradePrice()) + " " + offer.getCurrencyCode());
         addLabelTextField(gridPane, ++rowIndex, "Trade amount:", formatter.formatCoinWithCode(contract.getTradeAmount()));
-        addLabelTextFieldWithCopyIcon(gridPane, ++rowIndex, "Buyer bitcoin address:",
+        addLabelTextFieldWithCopyIcon(gridPane, ++rowIndex, "Buyer blackcoin address:",
                 contract.getBuyerPayoutAddressString()).second.setMouseTransparent(false);
-        addLabelTextFieldWithCopyIcon(gridPane, ++rowIndex, "Seller bitcoin address:",
+        addLabelTextFieldWithCopyIcon(gridPane, ++rowIndex, "Seller blackcoin address:",
                 contract.getSellerPayoutAddressString()).second.setMouseTransparent(false);
         addLabelTextFieldWithCopyIcon(gridPane, ++rowIndex, "Contract hash:",
                 Utils.HEX.encode(dispute.getContractHash())).second.setMouseTransparent(false);

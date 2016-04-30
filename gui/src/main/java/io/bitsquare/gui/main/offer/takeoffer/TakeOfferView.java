@@ -203,7 +203,7 @@ public class TakeOfferView extends ActivatableViewAndModel<AnchorPane, TakeOffer
                 directionLabel.setId("direction-icon-label-buy");
 
                 takeOfferButton.setId("buy-button-big");
-                takeOfferButton.setText("Review offer for buying bitcoin");
+                takeOfferButton.setText("Review offer for buying blackcoin");
                 nextButton.setId("buy-button");
             } else {
                 imageView.setId("image-sell-large");
@@ -211,7 +211,7 @@ public class TakeOfferView extends ActivatableViewAndModel<AnchorPane, TakeOffer
 
                 takeOfferButton.setId("sell-button-big");
                 nextButton.setId("sell-button");
-                takeOfferButton.setText("Review offer for selling bitcoin");
+                takeOfferButton.setText("Review offer for selling blackcoin");
             }
 
             boolean showComboBox = model.getPossiblePaymentAccounts().size() > 1;
@@ -322,7 +322,7 @@ public class TakeOfferView extends ActivatableViewAndModel<AnchorPane, TakeOffer
                     tradeAmountText +
                     "- Security deposit: " + model.getSecurityDeposit() + "\n" +
                     "- Trading fee: " + model.getTakerFee() + "\n" +
-                    "- Bitcoin mining fee: " + model.getNetworkFee() + "\n\n" +
+                    "- Blackcoin staking fee: " + model.getNetworkFee() + "\n\n" +
 
                     "For funding you can choose between 2 options:\n" +
                     "- Transfer fund from your Bitsquare wallet OR\n" +
@@ -753,7 +753,7 @@ public class TakeOfferView extends ActivatableViewAndModel<AnchorPane, TakeOffer
                 Utilities.openURI(URI.create(getBitcoinURI()));
             } catch (Exception ex) {
                 log.warn(ex.getMessage());
-                new Popup().warning("Opening a default bitcoin wallet application has failed. " +
+                new Popup().warning("Opening a default blackcoin wallet application has failed. " +
                         "Perhaps you don't have one installed?").show();
             }
         });

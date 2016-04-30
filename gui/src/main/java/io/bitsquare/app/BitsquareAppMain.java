@@ -106,7 +106,7 @@ public class BitsquareAppMain extends BitsquareExecutable {
         parser.accepts(ProgramArguments.USE_LOCALHOST, description("Use localhost network for development", false))
                 .withRequiredArg()
                 .ofType(boolean.class);
-        parser.accepts(BitcoinNetwork.KEY, description("Bitcoin network", BitcoinNetwork.DEFAULT))
+        parser.accepts(BitcoinNetwork.KEY, description("Blackcoin network", BitcoinNetwork.DEFAULT))
                 .withRequiredArg()
                 .ofType(BitcoinNetwork.class)
                 .withValuesConvertedBy(new EnumValueConverter(BitcoinNetwork.class));

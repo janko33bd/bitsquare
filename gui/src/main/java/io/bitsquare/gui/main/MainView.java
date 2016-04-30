@@ -116,8 +116,8 @@ public class MainView extends InitializableView<StackPane, MainViewModel> {
         MainView.rootContainer = this.root;
 
         ToggleButton marketButton = new NavButton(MarketView.class, "Market");
-        ToggleButton buyButton = new NavButton(BuyOfferView.class, "Buy BTC");
-        ToggleButton sellButton = new NavButton(SellOfferView.class, "Sell BTC");
+        ToggleButton buyButton = new NavButton(BuyOfferView.class, "Buy BLK");
+        ToggleButton sellButton = new NavButton(SellOfferView.class, "Sell BLK");
         ToggleButton portfolioButton = new NavButton(PortfolioView.class, "Portfolio");
         ToggleButton fundsButton = new NavButton(FundsView.class, "Funds");
         ToggleButton disputesButton = new NavButton(DisputesView.class, "Support");

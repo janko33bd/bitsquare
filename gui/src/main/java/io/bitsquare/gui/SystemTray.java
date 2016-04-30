@@ -102,7 +102,7 @@ public class SystemTray {
             }
 
             trayIcon.setPopupMenu(popupMenu);
-            trayIcon.setToolTip("Bitsquare: The decentralized bitcoin exchange");
+            trayIcon.setToolTip("Bitsquare: The decentralized blackcoin exchange");
 
             java.awt.SystemTray.getSystemTray().add(trayIcon);
         } catch (AWTException e1) {

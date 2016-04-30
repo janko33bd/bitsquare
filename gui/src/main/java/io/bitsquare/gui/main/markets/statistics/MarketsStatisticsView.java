@@ -162,7 +162,7 @@ public class MarketsStatisticsView extends ActivatableViewAndModel<GridPane, Mar
     }
 
     private TableColumn<MarketStatisticItem, MarketStatisticItem> getTotalAmountColumn() {
-        TableColumn<MarketStatisticItem, MarketStatisticItem> column = new TableColumn<MarketStatisticItem, MarketStatisticItem>("Total amount (BTC)") {
+        TableColumn<MarketStatisticItem, MarketStatisticItem> column = new TableColumn<MarketStatisticItem, MarketStatisticItem>("Total amount (BLK)") {
             {
                 setMinWidth(130);
             }

@@ -123,7 +123,7 @@ public class BuyerStep4View extends TradeStepView {
             return "The payout transaction is signed and finalized by both parties.\n" +
                     "For reducing bank chargeback risks the payout transaction is blocked by a lock time.\n" +
                     "After that lock time is over the payout transaction gets published and you receive " +
-                    "your bitcoin.";
+                    "your blackcoin.";
         else
             return "We are sending the payout transaction to the other peer.";
     }

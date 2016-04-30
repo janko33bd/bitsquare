@@ -42,7 +42,7 @@ public class BuyerStep3View extends TradeStepView {
 
     @Override
     protected String getInfoText() {
-        return "Waiting for the bitcoin seller's confirmation " +
+        return "Waiting for the blackcoin seller's confirmation " +
                 "for the receipt of the " + model.dataModel.getCurrencyCode() + " payment.";
     }
 

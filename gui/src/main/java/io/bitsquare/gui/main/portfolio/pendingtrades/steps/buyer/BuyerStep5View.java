@@ -123,7 +123,7 @@ public class BuyerStep5View extends TradeStepView {
 
         addLabelTextField(gridPane, ++gridRow, "Refunded security deposit:", model.getSecurityDeposit());
 
-        addTitledGroupBg(gridPane, ++gridRow, 2, "Withdraw your bitcoins", Layout.GROUP_DISTANCE);
+        addTitledGroupBg(gridPane, ++gridRow, 2, "Withdraw your blackcoins", Layout.GROUP_DISTANCE);
         addLabelTextField(gridPane, gridRow, "Amount to withdraw:", model.getPayoutAmount(), Layout.FIRST_ROW_AND_GROUP_DISTANCE);
         withdrawAddressTextField = addLabelInputTextField(gridPane, ++gridRow, "Withdraw to address:").second;
 
@@ -156,7 +156,7 @@ public class BuyerStep5View extends TradeStepView {
             if (!BitsquareApp.DEV_MODE && preferences.showAgain(key)) {
                 preferences.dontShowAgain(key, true);
                 new Notification().headLine("Trade completed")
-                        .notification("You can withdraw your funds now to your external Bitcoin wallet or transfer it to the Bitsquare wallet.")
+                        .notification("You can withdraw your funds now to your external Blackcoin wallet or transfer it to the Bitsquare wallet.")
                         .autoClose()
                         .show();
             }
@@ -259,7 +259,7 @@ public class BuyerStep5View extends TradeStepView {
             String key = "tradeCompleteWithdrawCompletedInfo";
             new Popup().headLine("Withdrawal completed")
                     .feedback("Your completed trades are stored under \"Portfolio/History\".\n" +
-                            "You can review all your bitcoin transactions under \"Funds/Transactions\"")
+                            "You can review all your blackcoin transactions under \"Funds/Transactions\"")
                     .actionButtonText("Go to \"Transactions\"")
                     .onAction(() -> model.dataModel.navigation.navigateTo(MainView.class, FundsView.class, TransactionsView.class))
                     .dontShowAgainId(key, preferences)
